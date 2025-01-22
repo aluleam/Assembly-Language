@@ -1,0 +1,262 @@
+Microsoft (R) Macro Assembler Version 6.11		    12/01/24 21:41:00
+AluleaA6.asm						     Page 1 - 1
+
+
+				; Name: Masumbuko Alulea
+				; Instructor: Dr. George Hamer
+				; Class: CSC 314
+				; Assignment #: 6
+				; Due: Dec 2, 2024
+				;--------------------------------------------------------------
+				
+				
+				;---------------------------- Description ---------------------
+				
+				;; Description: This program tests the MKAGCD procedure. 
+				;; It prompts the user for two numbers and calculates the GCD. 
+				;; Afterward, it asks if the user wants to calculate another GCD. 
+				;; The process repeats based on the user's input.
+				
+				include pcmac.inc  ; Include the pcmac.inc
+			      C         .XLIST
+			      C         .LIST
+			      C 
+				.model small       ; Use small memory model
+				.586               ; Target Intel 586 processor
+				.stack 100h        ; Reserve 256 bytes for stack
+				PUBLIC ABERTO      ; Make ABERTO procedure available to other modules
+				
+				
+				
+				;---------------------------- Data Segment ----------------------------
+				
+				
+				EXTRN MKAGCD:NEAR   ; External GCD function
+				
+ 0000				.data
+				    ;--------------------------------------------------------------
+				    ; Data Section: Input prompts, messages, and variables
+				    ;--------------------------------------------------------------
+ 0000 0000			    numA dw ?                ; First number
+ 0002 0000			    numB dw ?                ; Second number
+ 0004 00			    continue db ?            ; Continue flag (used for storing user input)
+ 0005 0D 0A 50 6C 65 61		    InputA db 13, 10, "Please enter the first integer: ", '$'  ; Prompt for first number
+       73 65 20 65 6E 74
+       65 72 20 74 68 65
+       20 66 69 72 73 74
+       20 69 6E 74 65 67
+       65 72 3A 20 24
+ 0028 0D 0A 50 6C 65 61		    InputB db 13, 10, "Please enter the second integer: ", '$' ; Prompt for second number
+       73 65 20 65 6E 74
+       65 72 20 74 68 65
+       20 73 65 63 6F 6E
+       64 20 69 6E 74 65
+       67 65 72 3A 20 24
+ 004C 0D 0A 57 6F 75 6C		    ContinueMsg db 13, 10, "Would you like to calculate another GCD? (Y/N): ", '$' ; Continue prompt
+       64 20 79 6F 75 20
+       6C 69 6B 65 20 74
+       6F 20 63 61 6C 63
+       75 6C 61 74 65 20
+       61 6E 6F 74 68 65
+       72 20 47 43 44 3F
+       20 28 59 2F 4E 29
+       3A 20 24
+ 007F 0D 0A 54 68 65 20		    gcdResultMsg db 13, 10, "The greatest common divisor (GCD) is: ", '$'  ; GCD result message
+       67 72 65 61 74 65
+       73 74 20 63 6F 6D
+       6D 6F 6E 20 64 69
+       76 69 73 6F 72 20
+       28 47 43 44 29 20
+       69 73 3A 20 24
+ 00A8 0D 0A 49 6E 76 61		    invalidInputMsg db 13, 10, "Invalid input. Please enter Y or N.", '$' ; Invalid input message
+       6C 69 64 20 69 6E
+       70 75 74 2E 20 50
+       6C 65 61 73 65 20
+       65 6E 74 65 72 20
+       59 20 6F 72 20 4E
+       2E 24
+				
+				
+				
+				;---------------------------- Code Segment ----------------------------
+				
+ 0000				.code               ; Code section
+				extrn GetDec:near   ; External GetDec function
+				extrn PutDec:near   ; External PutDec function
+				
+ 0000				ABERTO proc         ; Start of ABERTO procedure
+				    _Begin          ; Program start
+ 0000  B8 ---- R	     1	        mov     ax, @data
+ 0003  8E D8		     1	        mov     ds, ax
+ 0005  8C D3		     1	        mov     bx, ss
+ 0007  2B D8		     1	        sub     bx, ax
+ 0009  C1 E3 04		     1	        shl     bx, 4
+ 000C  8E D0		     1	        mov     ss, ax
+ 000E  03 E3		     1	        add     sp, bx
+				
+ 0010				programLoop:        ; Main loop to calculate GCD
+ 0010  2B C0			    sub ax, ax      ; Clear AX by subtracting itself
+ 0012  2B DB			    sub bx, bx      ; Clear BX by subtracting itself
+ 0014  2B C9			    sub cx, cx      ; Clear CX by subtracting itself
+ 0016  2B D2			    sub dx, dx      ; Clear DX by subtracting itself
+				
+				    _PutStr InputA  ; Display prompt for first number
+ 0018  8D 16 0005 R	     2	        lea     dx, InputA
+ 001C  B4 09		     1	        mov     ah, 09h
+ 001E  CD 21		     1	        int     21h
+ 0020  E8 0000 E		    call GetDec     ; Get the first number
+ 0023  A3 0000 R		    mov numA, ax    ; Store first number in numA
+				
+				    _PutStr InputB  ; Display prompt for second number
+ 0026  8D 16 0028 R	     2	        lea     dx, InputB
+ 002A  B4 09		     1	        mov     ah, 09h
+ 002C  CD 21		     1	        int     21h
+ 002E  E8 0000 E		    call GetDec     ; Get the second number
+ 0031  A3 0002 R		    mov numB, ax    ; Store second number in numB
+				
+ 0034  A1 0000 R		    mov ax, numA    ; Load numA into AX
+ 0037  8B 1E 0002 R		    mov bx, numB    ; Load numB into BX
+ 003B  E8 0000 E		    call MKAGCD     ; Call MKAGCD to calculate GCD
+				
+ 003E  8B C8			    mov cx, ax      ; Store GCD result in CX
+				    _PutStr gcdResultMsg    ; Display GCD result message
+ 0040  8D 16 007F R	     2	        lea     dx, gcdResultMsg
+ 0044  B4 09		     1	        mov     ah, 09h
+ 0046  CD 21		     1	        int     21h
+ 0048  8B C1			    mov ax, cx      ; Load GCD result into AX for display
+ 004A  8B D9			    mov bx, cx      ; Copy result to BX for PutDec
+ 004C  E8 0000 E		    call PutDec     ; Print the GCD
+				
+ 004F				verifyContinue:             ; Check if user wants to continue
+				    _PutStr ContinueMsg     ; Display continue prompt
+ 004F  8D 16 004C R	     2	        lea     dx, ContinueMsg
+ 0053  B4 09		     1	        mov     ah, 09h
+ 0055  CD 21		     1	        int     21h
+				    _GetCh                  ; Get user input
+ 0057  B4 01		     1	        mov     ah, 01h
+ 0059  CD 21		     1	        int     21h
+ 005B  A2 0004 R		    mov continue, al        ; Store user input in 'continue'
+				
+ 005E  80 3E 0004 R 4E		    cmp continue, 'N'       ; Check if 'N' (No)
+ 0063  74 1F			    je exitProgram          ; Exit program if 'N'
+ 0065  80 3E 0004 R 6E		    cmp continue, 'n'       ; Check if 'n' (no)
+ 006A  74 18			    je exitProgram          ; Exit program if 'n'
+ 006C  80 3E 0004 R 59		    cmp continue, 'Y'       ; Check if 'Y' (Yes)
+ 0071  74 9D			    je programLoop          ; Continue loop if 'Y'
+ 0073  80 3E 0004 R 79		    cmp continue, 'y'       ; Check if 'y' (yes)
+ 0078  74 96			    je programLoop          ; Continue loop if 'y'
+				
+				    _PutStr invalidInputMsg ; Invalid input message
+ 007A  8D 16 00A8 R	     2	        lea     dx, invalidInputMsg
+ 007E  B4 09		     1	        mov     ah, 09h
+ 0080  CD 21		     1	        int     21h
+ 0082  EB CB			    jmp verifyContinue      ; Loop back to verify input again
+				
+ 0084				exitProgram:                ; Exit program
+				    _exit 0                 ; Normal exit
+ 0084  B0 00		     1	        mov     al, 0
+ 0086  B4 4C		     1	        mov     ah, 4ch
+ 0088  CD 21		     1	        int     21h
+ 008A				ABERTO endp                 ; End of ABERTO procedure
+				
+				;---------------------------- End of Program ----------------------------
+				
+				END ABERTO           ; End of program
+				;------------------------------------------------------------------------
+Microsoft (R) Macro Assembler Version 6.11		    12/01/24 21:41:00
+AluleaA6.asm						     Symbols 2 - 1
+
+
+
+
+Macros:
+
+                N a m e                 Type
+
+???  . . . . . . . . . . . . . .	Proc
+_BIOSCh  . . . . . . . . . . . .	Proc
+_Begin . . . . . . . . . . . . .	Proc
+_Close . . . . . . . . . . . . .	Proc
+_Creat . . . . . . . . . . . . .	Proc
+_Exit  . . . . . . . . . . . . .	Proc
+_GetCh . . . . . . . . . . . . .	Proc
+_GetDate . . . . . . . . . . . .	Proc
+_GetStr  . . . . . . . . . . . .	Proc
+_GetTime . . . . . . . . . . . .	Proc
+_LSeek . . . . . . . . . . . . .	Proc
+_LdAddr  . . . . . . . . . . . .	Proc
+_LdSeg . . . . . . . . . . . . .	Proc
+_Open  . . . . . . . . . . . . .	Proc
+_PutCh . . . . . . . . . . . . .	Proc
+_PutStr  . . . . . . . . . . . .	Proc
+_Read  . . . . . . . . . . . . .	Proc
+_RsRegs  . . . . . . . . . . . .	Proc
+_SaveIntVec  . . . . . . . . . .	Proc
+_SetIntVec . . . . . . . . . . .	Proc
+_SvRegs  . . . . . . . . . . . .	Proc
+_Write . . . . . . . . . . . . .	Proc
+sBIOSCh  . . . . . . . . . . . .	Proc
+sClose . . . . . . . . . . . . .	Proc
+sCreat . . . . . . . . . . . . .	Proc
+sExit  . . . . . . . . . . . . .	Proc
+sGetCh . . . . . . . . . . . . .	Proc
+sGetDate . . . . . . . . . . . .	Proc
+sGetStr  . . . . . . . . . . . .	Proc
+sGetTime . . . . . . . . . . . .	Proc
+sLSeek . . . . . . . . . . . . .	Proc
+sOpen  . . . . . . . . . . . . .	Proc
+sPutCh . . . . . . . . . . . . .	Proc
+sPutStr  . . . . . . . . . . . .	Proc
+sRead  . . . . . . . . . . . . .	Proc
+sSaveIntVec  . . . . . . . . . .	Proc
+sSetIntVec . . . . . . . . . . .	Proc
+sWrite . . . . . . . . . . . . .	Proc
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+DGROUP . . . . . . . . . . . . .	GROUP
+_DATA  . . . . . . . . . . . . .	16 Bit	 00CE	  Word	  Public  'DATA'	
+STACK  . . . . . . . . . . . . .	16 Bit	 0100	  Para	  Stack	  'STACK'	 
+_TEXT  . . . . . . . . . . . . .	16 Bit	 008A	  Word	  Public  'CODE'	
+
+
+Procedures,  parameters and locals:
+
+                N a m e                 Type     Value    Attr
+
+ABERTO . . . . . . . . . . . . .	P Near	 0000	  _TEXT	Length= 008A Public
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+@CodeSize  . . . . . . . . . . .	Number	 0000h	 
+@DataSize  . . . . . . . . . . .	Number	 0000h	 
+@Interface . . . . . . . . . . .	Number	 0000h	 
+@Model . . . . . . . . . . . . .	Number	 0002h	 
+@code  . . . . . . . . . . . . .	Text   	 _TEXT
+@data  . . . . . . . . . . . . .	Text   	 DGROUP
+@fardata?  . . . . . . . . . . .	Text   	 FAR_BSS
+@fardata . . . . . . . . . . . .	Text   	 FAR_DATA
+@stack . . . . . . . . . . . . .	Text   	 DGROUP
+ContinueMsg  . . . . . . . . . .	Byte	 004C	  _DATA	
+GetDec . . . . . . . . . . . . .	L Near	 0000	  _TEXT	External
+InputA . . . . . . . . . . . . .	Byte	 0005	  _DATA	
+InputB . . . . . . . . . . . . .	Byte	 0028	  _DATA	
+MKAGCD . . . . . . . . . . . . .	L Near	 0000	  External
+PutDec . . . . . . . . . . . . .	L Near	 0000	  _TEXT	External
+continue . . . . . . . . . . . .	Byte	 0004	  _DATA	
+exitProgram  . . . . . . . . . .	L Near	 0084	  _TEXT	
+gcdResultMsg . . . . . . . . . .	Byte	 007F	  _DATA	
+invalidInputMsg  . . . . . . . .	Byte	 00A8	  _DATA	
+numA . . . . . . . . . . . . . .	Word	 0000	  _DATA	
+numB . . . . . . . . . . . . . .	Word	 0002	  _DATA	
+programLoop  . . . . . . . . . .	L Near	 0010	  _TEXT	
+verifyContinue . . . . . . . . .	L Near	 004F	  _TEXT	
+
+	   0 Warnings
+	   0 Errors
