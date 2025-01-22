@@ -1,0 +1,182 @@
+Microsoft (R) Macro Assembler Version 6.11		    11/12/24 14:55:19
+AluleaA4.asm						     Page 1 - 1
+
+
+				;; Name: Conversion of Fahrenheit to Celsius 
+				;; Class: CSC 314
+				;; Assign: Assignment 4
+				;; Due: 30th October 2024
+				
+				
+				;; This program converts Fahrenheit temperatures to Celsius.
+				;; It prompts the user to enter a temperature in Fahrenheit.
+				;; The conversion is done using the formula:
+				;; Celsius = (5/9) * (Fahrenheit - 32)
+				;; 
+				;; Steps:
+				;; 1. Display a message asking the user to enter a Fahrenheit temperature.
+				;; 2. Read the input value and store it.
+				;; 3. Subtract 32 from the input temperature.
+				;; 4. Multiply the result by 5.
+				;; 5. Divide the result by 9 to get the Celsius temperature.
+				;; 6. Display the converted temperature in Celsius as an integer.
+				
+				
+				include pcmac.inc         ; Include necessary macros
+			      C         .XLIST
+			      C         .LIST
+			      C 
+				.model small              ; Set memory model to small
+				.586                      ; Enable 32-bit instructions
+				.stack 100h               ; Set stack size to 256 bytes
+				
+ 0000				.data
+ 0000 45 6E 74 65 72 20		input_msg db "Enter temperature in Fahrenheit: ", '$'    ; Message to prompt user for input
+       74 65 6D 70 65 72
+       61 74 75 72 65 20
+       69 6E 20 46 61 68
+       72 65 6E 68 65 69
+       74 3A 20 24
+ 0022 54 68 65 20 74 65		output_msg db "The temperature in Celsius is: ", '$'        ; Message to display output
+       6D 70 65 72 61 74
+       75 72 65 20 69 6E
+       20 43 65 6C 73 69
+       75 73 20 69 73 3A
+       20 24
+ 0042 0000			fahrenheit dw 0                                           ; Variable to store Fahrenheit input
+ 0044 0000			celsius dw 0                                              ; Variable to store Celsius output
+				
+ 0000				.CODE
+				extrn PutDec:near       ; Function to print decimal values
+				extrn GetDec:near       ; Function to read decimal values
+				
+ 0000				ABERTO PROC
+				    _Begin                    ; Start main procedure
+ 0000  B8 ---- R	     1	        mov     ax, @data
+ 0003  8E D8		     1	        mov     ds, ax
+ 0005  8C D3		     1	        mov     bx, ss
+ 0007  2B D8		     1	        sub     bx, ax
+ 0009  C1 E3 04		     1	        shl     bx, 4
+ 000C  8E D0		     1	        mov     ss, ax
+ 000E  03 E3		     1	        add     sp, bx
+				    _PutStr input_msg         ; Show input message
+ 0010  8D 16 0000 R	     2	        lea     dx, input_msg
+ 0014  B4 09		     1	        mov     ah, 09h
+ 0016  CD 21		     1	        int     21h
+ 0018  E8 0000 E		    call GetDec               ; Get input from user and store in AX
+ 001B  A3 0042 R		    mov fahrenheit, ax        ; Store input in fahrenheit variable
+				
+				    _PutStr output_msg        ; Show output message
+ 001E  8D 16 0022 R	     2	        lea     dx, output_msg
+ 0022  B4 09		     1	        mov     ah, 09h
+ 0024  CD 21		     1	        int     21h
+				
+ 0026  A1 0042 R		    mov ax, fahrenheit        ; Load Fahrenheit input into AX
+ 0029  83 E8 20			    sub ax, 32                ; Subtract 32 from Fahrenheit
+				
+ 002C  BB 0005			    mov bx, 5                 ; Set BX to 5 for multiplication
+ 002F  B9 0009			    mov cx, 9                 ; Set CX to 9 for division
+ 0032  BA 0000			    mov dx, 0                 ; Clear DX for division
+				
+ 0035  0F AF C3			    imul ax, bx               ; Multiply (Fahrenheit - 32) by 5
+ 0038  F7 F9			    idiv cx                   ; Divide the result by 9
+				
+ 003A  A3 0044 R		    mov celsius, ax           ; Store the Celsius result
+ 003D  E8 0000 E		    call PutDec               ; Print the Celsius value
+				
+				    _Exit 0                   ; Exit program
+ 0040  B0 00		     1	        mov     al, 0
+ 0042  B4 4C		     1	        mov     ah, 4ch
+ 0044  CD 21		     1	        int     21h
+ 0046				ABERTO endp
+				
+				End ABERTO                  ; End of program
+Microsoft (R) Macro Assembler Version 6.11		    11/12/24 14:55:19
+AluleaA4.asm						     Symbols 2 - 1
+
+
+
+
+Macros:
+
+                N a m e                 Type
+
+???  . . . . . . . . . . . . . .	Proc
+_BIOSCh  . . . . . . . . . . . .	Proc
+_Begin . . . . . . . . . . . . .	Proc
+_Close . . . . . . . . . . . . .	Proc
+_Creat . . . . . . . . . . . . .	Proc
+_Exit  . . . . . . . . . . . . .	Proc
+_GetCh . . . . . . . . . . . . .	Proc
+_GetDate . . . . . . . . . . . .	Proc
+_GetStr  . . . . . . . . . . . .	Proc
+_GetTime . . . . . . . . . . . .	Proc
+_LSeek . . . . . . . . . . . . .	Proc
+_LdAddr  . . . . . . . . . . . .	Proc
+_LdSeg . . . . . . . . . . . . .	Proc
+_Open  . . . . . . . . . . . . .	Proc
+_PutCh . . . . . . . . . . . . .	Proc
+_PutStr  . . . . . . . . . . . .	Proc
+_Read  . . . . . . . . . . . . .	Proc
+_RsRegs  . . . . . . . . . . . .	Proc
+_SaveIntVec  . . . . . . . . . .	Proc
+_SetIntVec . . . . . . . . . . .	Proc
+_SvRegs  . . . . . . . . . . . .	Proc
+_Write . . . . . . . . . . . . .	Proc
+sBIOSCh  . . . . . . . . . . . .	Proc
+sClose . . . . . . . . . . . . .	Proc
+sCreat . . . . . . . . . . . . .	Proc
+sExit  . . . . . . . . . . . . .	Proc
+sGetCh . . . . . . . . . . . . .	Proc
+sGetDate . . . . . . . . . . . .	Proc
+sGetStr  . . . . . . . . . . . .	Proc
+sGetTime . . . . . . . . . . . .	Proc
+sLSeek . . . . . . . . . . . . .	Proc
+sOpen  . . . . . . . . . . . . .	Proc
+sPutCh . . . . . . . . . . . . .	Proc
+sPutStr  . . . . . . . . . . . .	Proc
+sRead  . . . . . . . . . . . . .	Proc
+sSaveIntVec  . . . . . . . . . .	Proc
+sSetIntVec . . . . . . . . . . .	Proc
+sWrite . . . . . . . . . . . . .	Proc
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+DGROUP . . . . . . . . . . . . .	GROUP
+_DATA  . . . . . . . . . . . . .	16 Bit	 0046	  Word	  Public  'DATA'	
+STACK  . . . . . . . . . . . . .	16 Bit	 0100	  Para	  Stack	  'STACK'	 
+_TEXT  . . . . . . . . . . . . .	16 Bit	 0046	  Word	  Public  'CODE'	
+
+
+Procedures,  parameters and locals:
+
+                N a m e                 Type     Value    Attr
+
+ABERTO . . . . . . . . . . . . .	P Near	 0000	  _TEXT	Length= 0046 Private
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+@CodeSize  . . . . . . . . . . .	Number	 0000h	 
+@DataSize  . . . . . . . . . . .	Number	 0000h	 
+@Interface . . . . . . . . . . .	Number	 0000h	 
+@Model . . . . . . . . . . . . .	Number	 0002h	 
+@code  . . . . . . . . . . . . .	Text   	 _TEXT
+@data  . . . . . . . . . . . . .	Text   	 DGROUP
+@fardata?  . . . . . . . . . . .	Text   	 FAR_BSS
+@fardata . . . . . . . . . . . .	Text   	 FAR_DATA
+@stack . . . . . . . . . . . . .	Text   	 DGROUP
+GetDec . . . . . . . . . . . . .	L Near	 0000	  _TEXT	External
+PutDec . . . . . . . . . . . . .	L Near	 0000	  _TEXT	External
+celsius  . . . . . . . . . . . .	Word	 0044	  _DATA	
+fahrenheit . . . . . . . . . . .	Word	 0042	  _DATA	
+input_msg  . . . . . . . . . . .	Byte	 0000	  _DATA	
+output_msg . . . . . . . . . . .	Byte	 0022	  _DATA	
+
+	   0 Warnings
+	   0 Errors

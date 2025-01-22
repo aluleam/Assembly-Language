@@ -1,0 +1,296 @@
+Microsoft (R) Macro Assembler Version 6.11		    11/20/24 06:45:56
+AluleaA5.asm						     Page 1 - 1
+
+
+				; Name: Masumbuko Alulea
+				; Class: CSC 314
+				; Assignment: 5
+				; Due Date: November 13, 2024
+				
+				; Description:
+				; This Assembly program displays a character that moves repeatedly across the screen.
+				; The character starts at the left edge, travels to the right edge, then returns to the left.
+				; Each full movement from left to right and back is counted as one trip.
+				; The user can specify the total number of trips for the character to complete.
+				; Once the user enters the number of trips, the character will begin moving and continue
+				; until it has completed the number of trips requested.
+				
+				include pcmac.inc               
+			      C         .XLIST
+			      C         .LIST
+			      C 
+				.model small                   
+				.586                          
+				.stack 100h                   
+				
+ 0000				.data  
+ 0000 00			    user_char db ?                  ; stores the character to be moved on the screen
+ 0001 00			    count db ?                      ; stores the number of occurrences
+				
+ 0002 45 6E 74 65 72 20		    promptCharacter db "Enter a character to display: ", '$'            ; prompt for character
+       61 20 63 68 61 72
+       61 63 74 65 72 20
+       74 6F 20 64 69 73
+       70 6C 61 79 3A 20
+       24
+ 0021 45 6E 74 65 72 20		    promptNum db "Enter number (1-4): ", '$'                            ; prompt for number of occurrences
+       6E 75 6D 62 65 72
+       20 28 31 2D 34 29
+       3A 20 24
+ 0036 49 6E 76 61 6C 69		    errorMsg db "Invalid input. Please enter a number between 1 and 4.", '$'   ; error message
+       64 20 69 6E 70 75
+       74 2E 20 50 6C 65
+       61 73 65 20 65 6E
+       74 65 72 20 61 20
+       6E 75 6D 62 65 72
+       20 62 65 74 77 65
+       65 6E 20 31 20 61
+       6E 64 20 34 2E 24
+				
+ 0000				.code
+				extrn GetDec:near
+				
+ 0000				GetCharacter proc
+				    _PutStr promptCharacter     ; Display character prompt
+ 0000  8D 16 0002 R	     2	        lea     dx, promptCharacter
+ 0004  B4 09		     1	        mov     ah, 09h
+ 0006  CD 21		     1	        int     21h
+				    _GetCh                      ; Read a character
+ 0008  B4 01		     1	        mov     ah, 01h
+ 000A  CD 21		     1	        int     21h
+ 000C  A2 0000 R		    mov user_char, al           ; Store character in user_char
+ 000F  C3			    ret
+ 0010				GetCharacter endp
+				
+				; Get the number of displays from the user
+ 0010				GetDisplays PROC
+ 0010  C6 06 0001 R 00		    mov count, 0                ; Initialize count with 0
+ 0015				getDisplaysl:
+				    _PutStr promptNum           ; Display number prompt
+ 0015  8D 16 0021 R	     2	        lea     dx, promptNum
+ 0019  B4 09		     1	        mov     ah, 09h
+ 001B  CD 21		     1	        int     21h
+ 001D  E8 0000 E		    call GetDec                 ; Get the number from the user
+ 0020  83 F8 01			    cmp ax, 1                   ; Check if less than 1
+ 0023  7C 09			    jl invalid                  ; Jump if invalid
+ 0025  83 F8 04			    cmp ax, 4                   ; Check if greater than 4
+ 0028  7F 04			    jg invalid                  ; Jump if invalid
+ 002A  A2 0001 R		    mov count, al               ; Store valid count as 8-bit in count
+ 002D  C3			    ret                         ; Return from procedure
+ 002E				invalid:
+				    _PutStr errorMsg            ; Display error message
+ 002E  8D 16 0036 R	     2	        lea     dx, errorMsg
+ 0032  B4 09		     1	        mov     ah, 09h
+ 0034  CD 21		     1	        int     21h
+ 0036  EB DD			    jmp getDisplaysl            ; Repeat input prompt
+ 0038				GetDisplays endp
+				
+				; Delay the program for a short duration
+ 0038				Delay PROC
+ 0038  66| 51			    push ecx                    ; Save caller's CX
+ 003A  50			    push ax                     ; Save caller's AX
+ 003B  B9 FFFF			    mov cx, 0FFFFh              ; Initialize delay count
+ 003E				LoopDelay:                      ; Start delay loop
+ 003E  90			    nop                         
+ 003F  49			    dec cx                      ; Decrement the counter
+ 0040  75 FC			    jnz LoopDelay               ; Repeat until CX is zero
+ 0042  58			    pop ax                      ; Restore caller's AX
+ 0043  66| 59			    pop ecx                     ; Restore caller's CX
+ 0045  C3			    ret                         ; Return from Delay
+ 0046				Delay ENDP
+				
+				; Move a character across the screen
+ 0046				PrintChar proc
+ 0046  50			    push ax                     ; Save AX
+ 0047  53			    push bx                     ; Save BX
+ 0048  51			    push cx                     ; Save CX
+ 0049  52			    push dx                     ; Save DX
+				    
+ 004A  8A 0E 0001 R		    mov cl, count               ; Load occurrences into CL
+ 004E				printLoop:                      ; Begin the loop
+ 004E  E8 000C			    call MoveChar               ; Call MoveChar instead of printChar
+ 0051  FE C9			    dec cl                      ; Decrement occurrences
+ 0053  80 F9 00			    cmp cl, 0                   ; Check if complete
+ 0056  75 F6			    jne printLoop               ; Repeat if not done
+				
+ 0058  5A			    pop dx                      ; Restore DX
+ 0059  59			    pop cx                      ; Restore CX
+ 005A  5B			    pop bx                      ; Restore BX
+ 005B  58			    pop ax                      ; Restore AX
+ 005C  C3			    ret                         ; Return from PrintChar
+ 005D				PrintChar endp
+				
+				; Move character across the screen
+ 005D				MoveChar proc
+ 005D  50			    push ax                     ; Save AX
+ 005E  53			    push bx                     ; Save BX
+ 005F  51			    push cx                     ; Save CX
+ 0060  52			    push dx                     ; Save DX
+				
+ 0061  B9 004F			    mov cx, 79                  ; Set line limit to 79
+ 0064				forwardLoop:                     ; Start forward movement loop
+ 0064  8A 16 0000 R		    mov dl, user_char           ; Load character to move
+				    _PutCh                      ; Write character to screen
+ 0068  B4 02		     1	        mov     ah, 02h
+ 006A  CD 21		     1	        int     21h 
+ 006C  E8 FFC9			    call Delay                  ; Delay for effect
+				    _PutCh 8                    ; Write backspace
+ 006F  B4 02		     1	        mov     ah, 02h
+ 0071  B2 08		     2	        mov     dl, 8
+ 0073  CD 21		     2	        int     21h
+    _PutCh 32                   ; Write space to clear character
+ 0075  B4 02		     1	        mov     ah, 02h
+ 0077  B2 20		     2	        mov     dl, 32
+ 0079  CD 21		     2	        int     21h
+ 007B  49			    dec cx                      ; Decrement line counter
+ 007C  75 E6			    jnz forwardLoop             ; Repeat until end of line
+				
+ 007E				backwardLoop:                   ; Start backward movement loop
+ 007E  8A 16 0000 R		    mov dl, user_char           ; Load character to move
+				    _PutCh                      ; Write character to screen
+ 0082  B4 02		     1	        mov     ah, 02h
+ 0084  CD 21		     1	        int     21h 
+ 0086  E8 FFAF			    call Delay                  ; Delay for effect
+				    _PutCh 8                    ; Write backspace
+ 0089  B4 02		     1	        mov     ah, 02h
+ 008B  B2 08		     2	        mov     dl, 8
+ 008D  CD 21		     2	        int     21h
+				    _PutCh 32                   ; Write space to clear character
+ 008F  B4 02		     1	        mov     ah, 02h
+ 0091  B2 20		     2	        mov     dl, 32
+ 0093  CD 21		     2	        int     21h
+ 0095  41			    inc cx                      ; Increment line counter
+ 0096  83 F9 4F			    cmp cx, 79                  ; Compare with line limit
+ 0099  75 E3			    jne backwardLoop            ; Repeat until start of line
+				
+				    _PutCh 13                   ; Write carriage return to screen
+ 009B  B4 02		     1	        mov     ah, 02h
+ 009D  B2 0D		     2	        mov     dl, 13
+ 009F  CD 21		     2	        int     21h
+				
+ 00A1  5A			    pop dx                      ; Restore DX
+ 00A2  59			    pop cx                      ; Restore CX
+ 00A3  5B			    pop bx                      ; Restore BX
+ 00A4  58			    pop ax                      ; Restore AX
+ 00A5  C3			    ret                         ; Return from procedure
+ 00A6				MoveChar endp
+				
+ 00A6				ABERTO proc
+ 00A6  B8 ---- R		    mov ax, @DATA               ; Load data segment address
+ 00A9  8E D8			    mov ds, ax                  ; Set data segment
+ 00AB  E8 FF52			    call GetCharacter           ; Get character input from user
+				    _PutCh 10                   ; Output line feed
+ 00AE  B4 02		     1	        mov     ah, 02h
+ 00B0  B2 0A		     2	        mov     dl, 10
+ 00B2  CD 21		     2	        int     21h
+				    _PutCh 13                   ; Move to start of line
+ 00B4  B4 02		     1	        mov     ah, 02h
+ 00B6  B2 0D		     2	        mov     dl, 13
+ 00B8  CD 21		     2	        int     21h
+ 00BA  E8 FF53			    call GetDisplays            ; Get number of displays from user
+ 00BD  E8 FF86			    call PrintChar              ; Move character across the screen
+				
+ 00C0  CD 21			    int 21h                     ; Call DOS
+ 00C2				ABERTO ENDP
+				
+				END ABERTO
+Microsoft (R) Macro Assembler Version 6.11		    11/20/24 06:45:56
+AluleaA5.asm						     Symbols 2 - 1
+
+
+
+
+Macros:
+
+                N a m e                 Type
+
+???  . . . . . . . . . . . . . .	Proc
+_BIOSCh  . . . . . . . . . . . .	Proc
+_Begin . . . . . . . . . . . . .	Proc
+_Close . . . . . . . . . . . . .	Proc
+_Creat . . . . . . . . . . . . .	Proc
+_Exit  . . . . . . . . . . . . .	Proc
+_GetCh . . . . . . . . . . . . .	Proc
+_GetDate . . . . . . . . . . . .	Proc
+_GetStr  . . . . . . . . . . . .	Proc
+_GetTime . . . . . . . . . . . .	Proc
+_LSeek . . . . . . . . . . . . .	Proc
+_LdAddr  . . . . . . . . . . . .	Proc
+_LdSeg . . . . . . . . . . . . .	Proc
+_Open  . . . . . . . . . . . . .	Proc
+_PutCh . . . . . . . . . . . . .	Proc
+_PutStr  . . . . . . . . . . . .	Proc
+_Read  . . . . . . . . . . . . .	Proc
+_RsRegs  . . . . . . . . . . . .	Proc
+_SaveIntVec  . . . . . . . . . .	Proc
+_SetIntVec . . . . . . . . . . .	Proc
+_SvRegs  . . . . . . . . . . . .	Proc
+_Write . . . . . . . . . . . . .	Proc
+sBIOSCh  . . . . . . . . . . . .	Proc
+sClose . . . . . . . . . . . . .	Proc
+sCreat . . . . . . . . . . . . .	Proc
+sExit  . . . . . . . . . . . . .	Proc
+sGetCh . . . . . . . . . . . . .	Proc
+sGetDate . . . . . . . . . . . .	Proc
+sGetStr  . . . . . . . . . . . .	Proc
+sGetTime . . . . . . . . . . . .	Proc
+sLSeek . . . . . . . . . . . . .	Proc
+sOpen  . . . . . . . . . . . . .	Proc
+sPutCh . . . . . . . . . . . . .	Proc
+sPutStr  . . . . . . . . . . . .	Proc
+sRead  . . . . . . . . . . . . .	Proc
+sSaveIntVec  . . . . . . . . . .	Proc
+sSetIntVec . . . . . . . . . . .	Proc
+sWrite . . . . . . . . . . . . .	Proc
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+DGROUP . . . . . . . . . . . . .	GROUP
+_DATA  . . . . . . . . . . . . .	16 Bit	 006C	  Word	  Public  'DATA'	
+STACK  . . . . . . . . . . . . .	16 Bit	 0100	  Para	  Stack	  'STACK'	 
+_TEXT  . . . . . . . . . . . . .	16 Bit	 00C2	  Word	  Public  'CODE'	
+
+
+Procedures,  parameters and locals:
+
+                N a m e                 Type     Value    Attr
+
+ABERTO . . . . . . . . . . . . .	P Near	 00A6	  _TEXT	Length= 001C Private
+Delay  . . . . . . . . . . . . .	P Near	 0038	  _TEXT	Length= 000E Private
+GetCharacter . . . . . . . . . .	P Near	 0000	  _TEXT	Length= 0010 Private
+GetDisplays  . . . . . . . . . .	P Near	 0010	  _TEXT	Length= 0028 Private
+MoveChar . . . . . . . . . . . .	P Near	 005D	  _TEXT	Length= 0049 Private
+PrintChar  . . . . . . . . . . .	P Near	 0046	  _TEXT	Length= 0017 Private
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+@CodeSize  . . . . . . . . . . .	Number	 0000h	 
+@DataSize  . . . . . . . . . . .	Number	 0000h	 
+@Interface . . . . . . . . . . .	Number	 0000h	 
+@Model . . . . . . . . . . . . .	Number	 0002h	 
+@code  . . . . . . . . . . . . .	Text   	 _TEXT
+@data  . . . . . . . . . . . . .	Text   	 DGROUP
+@fardata?  . . . . . . . . . . .	Text   	 FAR_BSS
+@fardata . . . . . . . . . . . .	Text   	 FAR_DATA
+@stack . . . . . . . . . . . . .	Text   	 DGROUP
+GetDec . . . . . . . . . . . . .	L Near	 0000	  _TEXT	External
+LoopDelay  . . . . . . . . . . .	L Near	 003E	  _TEXT	
+backwardLoop . . . . . . . . . .	L Near	 007E	  _TEXT	
+count  . . . . . . . . . . . . .	Byte	 0001	  _DATA	
+errorMsg . . . . . . . . . . . .	Byte	 0036	  _DATA	
+forwardLoop  . . . . . . . . . .	L Near	 0064	  _TEXT	
+getDisplaysl . . . . . . . . . .	L Near	 0015	  _TEXT	
+invalid  . . . . . . . . . . . .	L Near	 002E	  _TEXT	
+printLoop  . . . . . . . . . . .	L Near	 004E	  _TEXT	
+promptCharacter  . . . . . . . .	Byte	 0002	  _DATA	
+promptNum  . . . . . . . . . . .	Byte	 0021	  _DATA	
+user_char  . . . . . . . . . . .	Byte	 0000	  _DATA	
+
+	   0 Warnings
+	   0 Errors

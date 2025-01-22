@@ -1,0 +1,201 @@
+Microsoft (R) Macro Assembler Version 6.11		    10/15/24 19:21:07
+..\PROGRAMS\AluleaA3.asm				     Page 1 - 1
+
+
+				; Name: John Akujobi
+				; Class: CSC 314
+				; Assign: Assignment 3
+				; Due: 13th October 2023
+				
+				; Description:
+				; This program retrieves the current date and displays it in the format:
+				; Today's date is: MM/DD/YYYY
+				; It uses the DOS Service 2Ah to retrieve the date
+				; It uses the PutDec procedure to display the date
+				
+				include pcmac.inc
+			      C         .XLIST
+			      C         .LIST
+			      C 
+				
+				.MODEL SMALL  ; Set memory model to small
+				.586  ; Target the Intel 586 processor
+				.STACK 100h  ; Set stack size to 256 bytes (100h in hexadecimal)
+				
+ 0000				.DATA  ; Start of data segment
+				
+ 0000 54 6F 64 61 79 27		msg db "Today's date is: ", '$' ; Define a string message to display the date
+       73 20 64 61 74 65
+       20 69 73 3A 20 24
+				
+				; Variables to store date values
+ 0012 00			current_month db 0 ; Define a variable to store the current month
+ 0013 00			current_day db 0 ; Define a variable to store the current day
+ 0014 0000			current_year dw 0 ; Define a variable to store the current year
+				
+ 0000				.CODE  ; Start of code segment
+				extrn PutDec:near  ; External procedure declaration
+				extrn GetDec:near
+				
+				;start:
+ 0000				JAKUJ PROC ;PROC; Start of procedure named JAKUJ
+				
+				    _Begin ; Initialize the program
+ 0000  B8 ---- R	     1	        mov     ax, @data
+ 0003  8E D8		     1	        mov     ds, ax
+ 0005  8C D3		     1	        mov     bx, ss
+ 0007  2B D8		     1	        sub     bx, ax
+ 0009  C1 E3 04		     1	        shl     bx, 4
+ 000C  8E D0		     1	        mov     ss, ax
+ 000E  03 E3		     1	        add     sp, bx
+				    _PutStr msg ; Display the message
+ 0010  8D 16 0000 R	     2	        lea     dx, msg
+ 0014  B4 09		     1	        mov     ah, 09h
+ 0016  CD 21		     1	        int     21h
+				
+				
+				    ; Call DOS Service to retrieve date
+ 0018  B4 2A			    mov ah, 2Ah ; Set the value of AH register to 2Ah to call DOS Service to retrieve date
+ 001A  CD 21			    int 21h ; Call DOS Service to retrieve date
+				
+				    ; Store retrieved values in memory
+ 001C  88 36 0012 R		    mov [current_month], dh ; Store the retrieved month value in current_month variable
+ 0020  88 16 0013 R		    mov [current_day], dl ; Store the retrieved day value in current_day variable
+ 0024  89 0E 0014 R		    mov [current_year], cx ; Store the retrieved year value in current_year variable
+				
+				    ; Display "Today's date is: "
+				        ; Code from the Assignment 2
+				        ;mov ax, @data ; Move the value of AX register to DS register
+				        ;mov ds, ax ; Move the value of OFFSET msg to DX register
+				    ;mov ah, 9
+				    ;mov dx, OFFSET msg ; Set the value of DX register to the offset of the message string
+				    ;int 21h ; Call DOS Service to display the message
+				    ;_PutStr msg
+				
+				    ; Display Month
+ 0028  B6 00			    mov dh, 0 ; Set the value of DH register to 0
+ 002A  8A 16 0012 R		    mov dl, [current_month] ; Move the value of current_month variable to DL register
+ 002E  8B C2			    mov ax, dx ; Move the value of DX register to AX register
+ 0030  E8 0000 E		    call PutDec ; Call the PutDec procedure to display the month value
+				
+				    ; Display '/'
+ 0033  B4 02			    mov ah, 2 ; Set the value of AH register to 2 to display a character
+ 0035  B2 2F			    mov dl, '/' ; Set the value of DL register to '/' character
+ 0037  CD 21			    int 21h ; Call DOS Service to display the character
+				
+				    ; Display Day
+ 0039  B6 00			    mov dh, 0 ; Set the value of DH register to 0
+ 003B  8A 16 0013 R		    mov dl, [current_day] ; Move the value of current_day variable to DL register
+ 003F  8B C2			    mov ax, dx ; Move the value of DX register to AX register
+ 0041  E8 0000 E		    call PutDec ; Call the PutDec procedure to display the day value
+				
+				    ; Display '/'
+ 0044  B4 02			    mov ah, 2 ; Set the value of AH register to 2 to display a character
+ 0046  B2 2F			    mov dl, '/' ; Set the value of DL register to '/' character
+ 0048  CD 21			    int 21h ; Call DOS Service to display the character
+				
+				    ; Display Year
+ 004A  A1 0014 R		    mov ax, [current_year] ; Move the value of current_year variable to AX register
+ 004D  E8 0000 E		    call PutDec ; Call the PutDec procedure to display the year value
+				
+				    ; Exit
+ 0050  B4 4C			    mov ah, 4Ch ; Set the value of AH register to 4Ch to exit the program
+ 0052  CD 21			    int 21h ; Call DOS Service to exit the program
+				    
+				_Exit 0 ; Exit the program
+ 0054  B0 00		     1	        mov     al, 0
+ 0056  B4 4C		     1	        mov     ah, 4ch
+ 0058  CD 21		     1	        int     21h
+ 005A				JAKUJ ENDP  ; End of procedure named AKUJ
+				
+				END JAKUJ  ; Tell assembler to start execution at label named
+				;end start
+Microsoft (R) Macro Assembler Version 6.11		    10/15/24 19:21:07
+..\PROGRAMS\AluleaA3.asm				     Symbols 2 - 1
+
+
+
+
+Macros:
+
+                N a m e                 Type
+
+???  . . . . . . . . . . . . . .	Proc
+_BIOSCh  . . . . . . . . . . . .	Proc
+_Begin . . . . . . . . . . . . .	Proc
+_Close . . . . . . . . . . . . .	Proc
+_Creat . . . . . . . . . . . . .	Proc
+_Exit  . . . . . . . . . . . . .	Proc
+_GetCh . . . . . . . . . . . . .	Proc
+_GetDate . . . . . . . . . . . .	Proc
+_GetStr  . . . . . . . . . . . .	Proc
+_GetTime . . . . . . . . . . . .	Proc
+_LSeek . . . . . . . . . . . . .	Proc
+_LdAddr  . . . . . . . . . . . .	Proc
+_LdSeg . . . . . . . . . . . . .	Proc
+_Open  . . . . . . . . . . . . .	Proc
+_PutCh . . . . . . . . . . . . .	Proc
+_PutStr  . . . . . . . . . . . .	Proc
+_Read  . . . . . . . . . . . . .	Proc
+_RsRegs  . . . . . . . . . . . .	Proc
+_SaveIntVec  . . . . . . . . . .	Proc
+_SetIntVec . . . . . . . . . . .	Proc
+_SvRegs  . . . . . . . . . . . .	Proc
+_Write . . . . . . . . . . . . .	Proc
+sBIOSCh  . . . . . . . . . . . .	Proc
+sClose . . . . . . . . . . . . .	Proc
+sCreat . . . . . . . . . . . . .	Proc
+sExit  . . . . . . . . . . . . .	Proc
+sGetCh . . . . . . . . . . . . .	Proc
+sGetDate . . . . . . . . . . . .	Proc
+sGetStr  . . . . . . . . . . . .	Proc
+sGetTime . . . . . . . . . . . .	Proc
+sLSeek . . . . . . . . . . . . .	Proc
+sOpen  . . . . . . . . . . . . .	Proc
+sPutCh . . . . . . . . . . . . .	Proc
+sPutStr  . . . . . . . . . . . .	Proc
+sRead  . . . . . . . . . . . . .	Proc
+sSaveIntVec  . . . . . . . . . .	Proc
+sSetIntVec . . . . . . . . . . .	Proc
+sWrite . . . . . . . . . . . . .	Proc
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+DGROUP . . . . . . . . . . . . .	GROUP
+_DATA  . . . . . . . . . . . . .	16 Bit	 0016	  Word	  Public  'DATA'	
+STACK  . . . . . . . . . . . . .	16 Bit	 0100	  Para	  Stack	  'STACK'	 
+_TEXT  . . . . . . . . . . . . .	16 Bit	 005A	  Word	  Public  'CODE'	
+
+
+Procedures,  parameters and locals:
+
+                N a m e                 Type     Value    Attr
+
+JAKUJ  . . . . . . . . . . . . .	P Near	 0000	  _TEXT	Length= 005A Private
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+@CodeSize  . . . . . . . . . . .	Number	 0000h	 
+@DataSize  . . . . . . . . . . .	Number	 0000h	 
+@Interface . . . . . . . . . . .	Number	 0000h	 
+@Model . . . . . . . . . . . . .	Number	 0002h	 
+@code  . . . . . . . . . . . . .	Text   	 _TEXT
+@data  . . . . . . . . . . . . .	Text   	 DGROUP
+@fardata?  . . . . . . . . . . .	Text   	 FAR_BSS
+@fardata . . . . . . . . . . . .	Text   	 FAR_DATA
+@stack . . . . . . . . . . . . .	Text   	 DGROUP
+GetDec . . . . . . . . . . . . .	L Near	 0000	  _TEXT	External
+PutDec . . . . . . . . . . . . .	L Near	 0000	  _TEXT	External
+current_day  . . . . . . . . . .	Byte	 0013	  _DATA	
+current_month  . . . . . . . . .	Byte	 0012	  _DATA	
+current_year . . . . . . . . . .	Word	 0014	  _DATA	
+msg  . . . . . . . . . . . . . .	Byte	 0000	  _DATA	
+
+	   0 Warnings
+	   0 Errors

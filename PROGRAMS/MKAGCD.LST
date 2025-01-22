@@ -1,0 +1,135 @@
+Microsoft (R) Macro Assembler Version 6.11		    12/01/24 21:41:30
+MKAGCD.asm						     Page 1 - 1
+
+
+				;--------------------------------------------------------------
+				; Procedure to find the greatest common divisor (GCD)
+				;--------------------------------------------------------------
+				; Name: Masumbuko Alulea
+				; Instructor: Dr. George Hamer
+				; Class: CSC 314
+				; Assignment #: 6
+				; Due: Dec 2, 2024
+				;--------------------------------------------------------------
+				
+				;---------------------------- Description ---------------------
+				
+				; This program finds the Greatest Common Divisor (GCD) of two numbers.
+				; It repeatedly subtracts the smaller number from the larger one until 
+				; both numbers are equal. The final value is the GCD.
+				
+				.model small        ; Use small memory model
+				.586                ; Target Intel 586 processor
+				.stack 100h         ; Reserve 256 bytes for stack
+				PUBLIC MKAGCD       ; Make MKAGCD procedure available to other modules
+				
+				
+				;---------------------------- Code Segment ----------------------------
+				
+ 0000				.code        
+				
+ 0000				MKAGCD PROC         ; Procedure to calculate GCD
+ 0000  52			    PUSH DX         ; Save DX register
+ 0001  56			    PUSH SI         ; Save SI register
+ 0002  57			    PUSH DI         ; Save DI register
+ 0003  55			    PUSH BP         ; Save BP register
+				
+				    ;--------------------------------------------------------------
+				    ; Ensure AX and BX are positive (if negative, negate them)
+				    ;--------------------------------------------------------------
+ 0004  83 F8 00			    cmp ax, 0       ; Compare AX with zero
+ 0007  7F 02			    jg skipNegAx    ; If AX is positive, skip negation
+ 0009  F7 D8			    neg ax          ; Negate AX to make it positive
+ 000B				skipNegAx:          
+ 000B  83 FB 00			    cmp bx, 0       ; Compare BX with zero
+ 000E  7F 02			    jg skipNegBx    ; If BX is positive, skip negation
+ 0010  F7 DB			    neg bx          ; Negate BX to make it positive
+ 0012				skipNegBx:
+				
+				    ;--------------------------------------------------------------
+				    ; Check if either AX or BX is zero, handle if true
+				    ;--------------------------------------------------------------
+ 0012				handleZeroCase:     
+ 0012  83 F8 00			    cmp ax, 0       ; Check if AX is zero
+ 0015  74 18			    je setBX        ; If AX is zero, set GCD to BX
+ 0017  83 FB 00			    cmp bx, 0       ; Check if BX is zero
+ 001A  74 0F			    je setAx        ; If BX is zero, set GCD to AX
+				
+ 001C				gcdCalLoop:         ; Start of the loop to calculate GCD
+ 001C  2B D2			    sub dx, dx      ; Clear DX by subtracting it from itself, set DX to 0
+ 001E  F7 F3			    div bx          ; Divide AX by BX, quotient in AX, remainder in DX
+ 0020  8B C3			    mov ax, bx      ; Move BX to AX for the next iteration
+ 0022  8B DA			    mov bx, dx      ; Move remainder into BX for the next iteration
+ 0024  83 FB 00			    cmp bx, 0       ; Compare BX remainder with zero
+ 0027  75 F3			    jne gcdCalLoop  ; If remainder is not zero, repeat the loop
+ 0029  74 08			    je endGCD       ; If remainder is zero, jump to end
+				
+ 002B				setAx:              ; Set GCD to AX if BX was zero
+ 002B  8B C0			    mov ax, ax      ; Set GCD to AX
+ 002D  EB 04			    jmp endGCD      ; Jump to end
+				
+ 002F				setBX:              ; Set GCD to BX if AX was zero
+ 002F  8B C3			    mov ax, bx      ; Set GCD to BX
+ 0031  EB 00			    jmp endGCD      ; Jump to end
+				
+				
+ 0033				endGCD:             ; End of the GCD procedure
+				    ;--------------------------------------------------------------
+				    ; Restore registers and return from procedure
+				    ;--------------------------------------------------------------
+ 0033  5D			    POP BP          ; Restore BP register
+ 0034  5F			    POP DI          ; Restore DI register
+ 0035  5E			    POP SI          ; Restore SI register
+ 0036  5A			    POP DX          ; Restore DX register
+ 0037  C3			    ret             ; Return from MKAGCD procedure
+				
+ 0038				MKAGCD ENDP         ; End of MKAGCD procedure
+				
+				end                 ; End of assembly code
+				;--------------------------------------------------------------
+Microsoft (R) Macro Assembler Version 6.11		    12/01/24 21:41:30
+MKAGCD.asm						     Symbols 2 - 1
+
+
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+DGROUP . . . . . . . . . . . . .	GROUP
+_DATA  . . . . . . . . . . . . .	16 Bit	 0000	  Word	  Public  'DATA'	
+STACK  . . . . . . . . . . . . .	16 Bit	 0100	  Para	  Stack	  'STACK'	 
+_TEXT  . . . . . . . . . . . . .	16 Bit	 0038	  Word	  Public  'CODE'	
+
+
+Procedures,  parameters and locals:
+
+                N a m e                 Type     Value    Attr
+
+MKAGCD . . . . . . . . . . . . .	P Near	 0000	  _TEXT	Length= 0038 Public
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+@CodeSize  . . . . . . . . . . .	Number	 0000h	 
+@DataSize  . . . . . . . . . . .	Number	 0000h	 
+@Interface . . . . . . . . . . .	Number	 0000h	 
+@Model . . . . . . . . . . . . .	Number	 0002h	 
+@code  . . . . . . . . . . . . .	Text   	 _TEXT
+@data  . . . . . . . . . . . . .	Text   	 DGROUP
+@fardata?  . . . . . . . . . . .	Text   	 FAR_BSS
+@fardata . . . . . . . . . . . .	Text   	 FAR_DATA
+@stack . . . . . . . . . . . . .	Text   	 DGROUP
+endGCD . . . . . . . . . . . . .	L Near	 0033	  _TEXT	
+gcdCalLoop . . . . . . . . . . .	L Near	 001C	  _TEXT	
+handleZeroCase . . . . . . . . .	L Near	 0012	  _TEXT	
+setAx  . . . . . . . . . . . . .	L Near	 002B	  _TEXT	
+setBX  . . . . . . . . . . . . .	L Near	 002F	  _TEXT	
+skipNegAx  . . . . . . . . . . .	L Near	 000B	  _TEXT	
+skipNegBx  . . . . . . . . . . .	L Near	 0012	  _TEXT	
+
+	   0 Warnings
+	   0 Errors
